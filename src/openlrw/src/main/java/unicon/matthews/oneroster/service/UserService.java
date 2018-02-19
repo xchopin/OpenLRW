@@ -1,8 +1,7 @@
 package unicon.matthews.oneroster.service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,6 +34,20 @@ public class UserService {
     }
     
     return mongoUser.getUser();
+  }
+
+  /**
+   * Finds and returns all the users that belong to a tenant and an organization given.
+   *
+   * @param tenantId  an id of a tenant
+   * @param orgId     an id of an organization
+   * @return          the users
+   */
+  public Collection<MongoUser> findAll(final String tenantId, final String orgId) {
+    if (StringUtils.isBlank(tenantId) || StringUtils.isBlank(orgId))
+      throw new IllegalArgumentException();
+
+    return mongoUserRepository.findByTenantIdAndOrgId(tenantId, orgId);
   }
   
   public User save(final String tenantId, final String orgId, User user) {

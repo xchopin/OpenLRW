@@ -1,11 +1,9 @@
-/**
- * 
- */
 package unicon.matthews.oneroster.endpoint;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +27,7 @@ import unicon.matthews.oneroster.exception.UserNotFoundException;
 import unicon.matthews.oneroster.service.EnrollmentService;
 import unicon.matthews.oneroster.service.ResultService;
 import unicon.matthews.oneroster.service.UserService;
+import unicon.matthews.oneroster.service.repository.MongoUser;
 import unicon.matthews.security.auth.JwtAuthenticationToken;
 import unicon.matthews.security.model.UserContext;
 
@@ -62,6 +61,19 @@ public class UserController {
         .fromCurrentRequest().path("/{id}")
         .buildAndExpand(savedUser.getSourcedId()).toUri());
     return new ResponseEntity<>(savedUser, httpHeaders, HttpStatus.CREATED);
+  }
+
+  /**
+   * Returns all the users for a tenant id and an organization id given.
+   *
+   * @param token                 a JWT to get authenticated
+   * @return                      the users
+   * @throws UserNotFoundException
+   */
+  @RequestMapping(method = RequestMethod.GET)
+  public Collection<MongoUser> getUsers(JwtAuthenticationToken token) throws UserNotFoundException {
+    UserContext userContext = (UserContext) token.getPrincipal();
+    return userService.findAll(userContext.getTenantId(), userContext.getOrgId());
   }
   
   @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
